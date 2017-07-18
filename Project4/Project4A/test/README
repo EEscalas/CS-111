@@ -1,0 +1,21 @@
+NAME: Elena Escalas
+EMAIL: elenaescalas@g.ucla.edu
+ID: 704560697
+
+Serial Number: FZEDA623D01YM1501
+WIFI MAC: fc:db:b3:9a:f3:ac
+
+Files:
+
+selife.jpg is a selfie with me and my assembled Edison board
+
+ifconfig.png shows a screenshot of the output after running ifconfig in a USB terminal command session
+
+scp.png shows a screenshot of my local Windows PowerShell Bash terminal scp
+command to copy the hello world program from my laptop to my Edison
+
+helloWorld.png shows a screenshot from a  WIFI SSH session in which I build and
+run the trivial helloWorld program
+
+git.png shows a screenshot from a WIFI SSH session in which I run the command
+clone with a repository from my gitHub called CS111Edison

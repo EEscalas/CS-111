@@ -1,0 +1,17 @@
+#NAME: Elena Escalas
+#EMAIL: elenaescalas@g.ucla.edu
+#ID: 704560697
+
+CC = gcc
+RM = rm -f
+
+default:
+	@$(CC) -o lab1b-client lab1b-client.c -lmcrypt
+	@$(CC) -o lab1b-server lab1b-server.c -lmcrypt
+
+dist:
+	@tar -cf lab1b-704560697.tar.gz README Makefile lab1b-client.c lab1b-server.c
+
+clean:
+	@$(RM) lab1b-client
+	@$(RM) lab1b-server

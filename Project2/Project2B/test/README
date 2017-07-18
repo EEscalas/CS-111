@@ -1,0 +1,96 @@
+NAME: Elena Escalas
+ID: 704560697
+EMAIL: elenaescalas@g.ucla.edu
+
+Included Files:
+
+	 SortedList.h		"a header file containing interfaces for linked list operations"
+
+	 SortedList.c		"the source for a C source module that compiles cleanly (with no errors 
+	 			or warnings), and implements insert, delete, lookup, and length methods 
+				for a sorted doubly linked list (described in the provided header file, 
+				including correct placement of pthread_yield calls)."
+
+	 lab2_list.c		"the source for a C program that compiles cleanly (with no errors or warnings),
+	 			and implements the specified command line options (--threads, --iterations, 
+				--yield, --sync, --lists), drives one or more parallel threads that do 
+				operations on a shared linked list, and reports on the final list and 
+				performance. Note that we expect sementation faults in non-synchronized 
+				multi-thread runs, so your program should catch those and report the run 
+				as having failed"
+
+	 Makefile		"build the deliverable programs, output, graphs, and tarball"
+	 			default: compile lab2_list executable
+				tests: run specified test cases to generate CSV results
+				profile: "run tests with profiling tools to generate an execution profiling report"
+				graphs: do preliminary grep work to divide the CSV results into more specified
+				smaller CSV files and "use gnuplot to generate the required graphs"
+
+	 lab2b_list.csv		contains the results of all test runs
+
+	 profile.out		"execution profiling report showing hwere time was spent in the un-partitioned 
+	 			spin-lock implementation"
+
+	 lab2b_1.png		"throughput vs number of threads for mutex and spin-lock synchronized list 
+	 			operations."
+
+	 lab2b_2.png		"mean time per mutex wait and mean time per operation for mutex-synchronized
+	 			list operations"
+
+	 lab2b_3.png 		"successful iterations vs threads for each synchronization method."
+
+	 lab2b_4.png 		"throughput vs number of threads for mutex synchronized partitioned lists."
+
+	 lab2b_5.png 		"throughput vs number of threads for spin-lock-synchronized partitioned lists."
+
+	 README			this file: a description of included files and brief answers to project questions
+
+	 lab2b_list.gp		gnuplot file that converts CSV file to graphs
+
+Questions:
+
+	Question 2.3.1 - Cycles in the basic list implementation:
+		 In one and two thread operations most cycles are spent executing list operations such as insert.
+		 Since there is no spinning or waiting for locks, there are not threads competing for the lists,
+		 therefore the only costly operation would be performing manipulations to the list.
+		 I believe most of the time/cycles in high-thread spin-lock tests are spent spinning.
+		 I believe more of the time/cycles in high-thread mutex tests are spent waiting for the lock
+		 or waiting in the queue to be scheduled to run again.
+		 This is clear in graph 2 as the threads collectively spend more time waiting for locks than
+		 the total completion time.
+
+	Question 2.3.2 - Execution Profiling:
+		 The lines where the spin lock test_and_set function is called is consuming the most cycles,
+		 while the second-highest number of cycles consumed goes to list operations. The spinning
+		 is consuming approximately 3-4 times as many cycles as the list operations.
+		 For the same reason as above, as the number of threads increases, there is an increase
+		 in memory contention, therefore more threads are trying to acquire the same lock, which
+		 creates a situation in which more threads are spinning waiting for other threads to execute
+		 critical sections before those threads can obtain the lock.
+
+	Question 2.3.3 - Mutex wait time:
+		 With more threads, there is more memory contention, hence more threads want the lock and do
+		 not have it, so they must either spin or wait for longer amounts of time.
+		 The time spent having threads waiting for locks is compensated by the increase in overall
+		 speed of the program due to the efficiency of concurrent programs.
+		 The wait time is the sum of multiple thread wait times, whereas the overall time is only
+		 the time the program takes to run. One threads' wait time cannot exceed the overall completion
+		 time, but the sum of all the threads' wait times can exceed the completion time as many
+		 threads could be waiting extended periods of time in the queue or spinning until they can
+		 actually run.
+
+	Question 2.3.4 - Performance of Partitioned Lists
+		 As displayed in graphs 4 and 5, the overall throughput of the program is much greater
+		 when there's an increase in the number of lists. The greatest difference occurs with
+		 the shift from one list to 4, and then there is not as great of a difference between
+		 4, 8, and 16 lists, but there is still a significant increase in throughput as the
+		 number of threads and number of lists increase.
+		 The throughput should continue to increase as the number of lists increases only to a
+		 certain point. With more lists, you have a lower likelihood of collisions that force
+		 waiting/spinning for locks, which decreases throughput, but after there are enough lists
+		 to have one element in each list there is no benefit to having any more lists because
+		 the probability of collisions within buckets of the hash table is still very low.
+		 The throughput of an N-way partitioned list appears to be equivalient to the throughput
+		 of a single list with fewer (1/N) threads. This makes sense because the probability for
+		 memory contention is similar for very few threads as it would be for large hash tables
+		 (larger numbers of lists).

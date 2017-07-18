@@ -1,0 +1,156 @@
+//Elena Escalas
+//704560697
+//elenaescalas@g.ucla.edu
+
+#include <stdio.h>
+#include <unistd.h>
+#include <getopt.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <time.h>
+#include <pthread.h>
+#include <sched.h>
+
+//variable to enable diagnostic yield calls
+int opt_yield;
+
+#define INSERT_YIELD 0x01 // yield in insert critical section
+#define DELETE_YIELD 0x02 // yield in delete critical section
+#define LOOKUP_YIELD 0x04 // yield in lookup/length critical section
+
+struct SortedListElement
+{
+  struct SortedListElement *prev;
+  struct SortedListElement *next;
+  const char *key;
+};
+
+typedef struct SortedListElement SortedList_t;
+typedef struct SortedListElement SortedListElement_t;
+
+void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
+{
+  if (list == NULL || element == NULL)
+    return;
+
+  //if first element in list
+  if (list->next == NULL)
+    {
+      //critical section
+      if (opt_yield & INSERT_YIELD)
+	  sched_yield();
+
+      list->next = element;
+      element->prev = list;
+      element->next = NULL;
+
+      return;
+    }
+
+  SortedListElement_t *current = list;
+  SortedListElement_t *cur_next = list->next;
+  
+  // traverse through the list until position to insert new element is found
+  while (cur_next != NULL && strcmp(element->key, cur_next->key) >= 0)
+    {
+      current = cur_next;
+      cur_next = cur_next->next;
+    }
+
+  //critical section
+  if (opt_yield & INSERT_YIELD)
+      sched_yield();
+
+  // if element is the last element
+  if (cur_next == NULL)
+    {
+      current->next = element;
+      element->prev = current;
+      element->next = NULL;
+    }
+  else
+    {
+      current->next = element;
+      cur_next->prev = element;
+      element->next = cur_next;
+      element->prev = current;
+    }
+}
+
+int SortedList_delete(SortedListElement_t *element)
+{
+  
+  //check to make sure valid prev/next
+  if (element == NULL || element->next->prev != element || element->prev->next != element)
+    return 1;
+
+  if (opt_yield & DELETE_YIELD)
+    sched_yield();
+  
+  //not last element in list
+  if (element->next != NULL)
+    {
+      element->next->prev = element->prev;
+      return 0;
+    }
+  
+  //first element in list
+  if (element->prev != NULL)
+    {
+      element->prev->next = element->next;
+      return 0;
+    }
+
+  return 0;
+}
+
+SortedListElement_t *SortedList_lookup(SortedList_t *list, const char *key)
+{
+
+  if (list == NULL)
+    return NULL;
+  
+  SortedList_t *current = list->next;
+
+  while(current != NULL)
+    {
+      if (opt_yield & LOOKUP_YIELD)
+	sched_yield();
+
+      if (strcmp(key, current->key) == 0)
+	return current;
+      else
+	current = current->next;
+    }
+  
+  return NULL;
+}
+
+int SortedList_length(SortedList_t *list)
+{
+  if (list == NULL)
+    return -1;
+
+  int element_count = 0;
+
+  SortedList_t *current = list->next;
+
+  while (current != NULL)
+    {
+      //check to make sure prev and next pointers are valid
+      if (current->prev != NULL && current->prev->next != current)
+	return -1;
+      if (current->next != NULL && current->next->prev != current)
+	return -1;
+
+      element_count++;
+      current = current->next;
+    }
+
+  return element_count;
+}

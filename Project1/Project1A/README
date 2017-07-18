@@ -1,0 +1,20 @@
+NAME: Elena Escalas
+EMAIL: elenaescalas@g.ucla.edu
+ID: 704560697
+
+Tests:
+	$./lab1a 
+	test typing words and enter
+	test ^C - does nothing
+	test ^D exits
+	$./lab1a --shell
+	test ls (or any other simple command)
+	test ^C gives proper shutdown output
+	test ^D gives proper shutdown output
+	
+
+Sources: 
+GNU C Library
+Stack Overflow
+man pages
+TA slides/resources

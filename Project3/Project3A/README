@@ -1,0 +1,31 @@
+NAME: Elena Escalas, Susan Krkasharian
+EMAIL: elenaescalas@g.ucla.edu, skrkasharian@yahoo.com
+ID: 704560697, 104584663
+
+Included Files
+lab3a.c
+Source code for lab3a program.
+
+Makefile
+Builds and runs the deliverable program, with higher level targets: default,
+dist, and clean.
+
+ext2_kampe.h
+Provided to us: slightly simplified version of the Linux header file that
+defines the format of the EXT2 file system.
+
+README
+Current file.
+
+References
+https://stackoverflow.com/questions/26411131/iterate-through-bits-in-c
+https://stackoverflow.com/questions/14679022/converting-from-an-integer-epoch-time-value-to-local-time
+http://www.cplusplus.com/reference/ctime/strftime/
+https://www.tutorialspoint.com/c_standard_library/c_function_localtime.htm
+http://www.nongnu.org/ext2-doc/ext2.html#INODE-TABLE
+http://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+http://man7.org/linux/man-pages/man2/pread.2.html
+https://www.tutorialspoint.com/c_standard_library/c_function_fprintf.htm
+https://stackoverflow.com/questions/572049/convert-seconds-to-days-minutes-and-hours-in-obj-c
+https://linux.die.net/man/3/localtime
+http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html

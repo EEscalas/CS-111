@@ -1,0 +1,13 @@
+NAME: Elena Escalas
+EMAIL: elenaescalas@g.ucla.edu
+ID: 704560697
+
+Test cases:
+     performing commands between servers with all of the options
+
+
+Sources:
+Unix Socket Client Example
+Replace calls bzero,bcopy,and bcmp
+mcrypt(3) man page
+dprintf(3) man page

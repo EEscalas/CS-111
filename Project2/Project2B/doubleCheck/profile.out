@@ -1,0 +1,472 @@
+Total: 1086 samples
+     783  72.1%  72.1%     1086 100.0% threadTask
+     237  21.8%  93.9%      237  21.8% __strcmp_sse42
+      33   3.0%  97.0%      142  13.1% SortedList_lookup
+      32   2.9%  99.9%      161  14.8% SortedList_insert
+       1   0.1% 100.0%        1   0.1% _init
+       0   0.0% 100.0%     1086 100.0% __clone
+       0   0.0% 100.0%     1086 100.0% start_thread
+ROUTINE ====================== threadTask in /u/cs/ugrad/elena/ElenaUCLA/Soph/CS111/Project2/Project2B/lab2_list.c
+   783   1086 Total samples (flat / cumulative)
+     .      .   73: {
+     .      .   74:   return (1000000000L * (end_time.tv_sec - start_time.tv_sec)) + (end_time.tv_nsec - start_time.tv_nsec);
+     .      .   75: }
+     .      .   76: 
+     .      .   77: void *threadTask(void *thread_arg)
+---
+     .      .   78: {
+     .      .   79:   struct timespec waiting_for_lock, obtained_lock;
+     .      .   80:   long long waitlock_total = 0;
+     .      .   81:   long long total_num_locks = 0;
+     .      .   82: 
+     .      .   83:   /*// apply locks: either mutex or spin
+     .      .   84:   if (sync_type == 'm')
+     .      .   85:     {
+     .      .   86:       clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .   87:       if (opt_debug) fprintf(stdout, "locking mutex lock\n");
+     .      .   88:       pthread_mutex_lock(&mutex_lock);
+     .      .   89:       clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .   90:       waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .   91:       total_num_locks++;
+     .      .   92:       if (opt_debug) fprintf(stdout, "Total waitlock time (with mutex): %llu\n", waitlock_total);
+     .      .   93:     }
+     .      .   94:   else if (sync_type == 's')
+     .      .   95:     {
+     .      .   96:       clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .   97:       if (opt_debug) fprintf(stdout, "locking spin lock\n");
+     .      .   98:       while (__sync_lock_test_and_set(&lock,1));
+     .      .   99:       clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  100:       waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  101:       total_num_locks++;
+     .      .  102:       if (opt_debug) fprintf(stdout,"Total waitlock time (with spin): %llu\n", waitlock_total);
+     .      .  103:       }*/
+     .      .  104:   
+     .      .  105:   if (opt_debug) fprintf(stdout, "This thread has gotten past locks, congrats\n"); 
+     .      .  106:   
+     .      .  107:   int* ptr_thread_num = (int*)thread_arg;
+     .      .  108:   int thread_num = *ptr_thread_num;
+     .      .  109: 
+     .      .  110:   //if (opt_debug_general && opt_sync) fprintf(stdout, "Thread %i has the lock\n", thread_num);
+     .      .  111: 
+     .      .  112:   if (opt_debug) fprintf(stdout, "Thread %i is about to start inserting, congrats\n", thread_num);
+     .      .  113: 
+     .      .  114:   long long element_start = thread_num*num_iterations;
+     .      .  115:   if (opt_debug_general) fprintf(stdout, "The start index for elements for thread %i is %llu\n", thread_num, element_start);
+     .      .  116:   long long element_end = element_start + num_iterations;
+     .      .  117: 
+     .      .  118:   ///////////////////* INSERT *///////////////////
+     .      .  119:   long j;
+     .      .  120:   int list_num;
+     .      .  121:   for (j = element_start; j < element_end; j++)
+     .      .  122:     {
+     .      .  123:       char *element_to_insert_key = malloc(sizeof(char)*11);
+     .      .  124:       if(element_to_insert_key == NULL)
+     .      .  125: 	{
+     .      .  126: 	  fprintf(stderr, "Error: unable to allocate memory to find hash to insert key \n");
+     .      .  127: 	  exit(1);
+     .      .  128: 	}
+     .      .  129:       else
+     .      .  130: 	strcpy(element_to_insert_key,(elements+j)->key);
+     .      .  131:       
+     .      .  132:       list_num = hash(element_to_insert_key);
+     .      .  133:       
+     .      .  134:       // LOCK //
+     .      .  135:       if (sync_type == 'm')
+     .      .  136: 	{	
+     .      .  137: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  138: 	  pthread_mutex_lock(&mutex_locks[list_num]);
+     .      .  139: 	  clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  140: 	  waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  141: 	  total_num_locks++;
+     .      .  142: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i. Ready to Insert.\n", thread_num, list_num);
+     .      .  143: 	}
+     .      .  144:       else if (sync_type == 's')
+     .      .  145: 	{
+     .      .  146: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+   442    442  147: 	  while (__sync_lock_test_and_set(&locks[list_num],1));
+     .      .  148: 	  clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  149: 	  waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  150: 	  total_num_locks++;
+     .      .  151: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i. Ready to Insert.\n", thread_num, list_num);
+     .      .  152: 	}
+     .      .  153:       
+     .    161  154:       SortedList_insert(&head[list_num],elements+j);
+     .      .  155: 
+     .      .  156:       // UNLOCK //
+     .      .  157:       if (sync_type == 'm')
+     .      .  158: 	pthread_mutex_unlock(&mutex_locks[list_num]);
+     .      .  159:       else if (sync_type == 's')
+     .      .  160: 	__sync_lock_release(&locks[list_num]);
+     .      .  161: 
+     .      .  162:       if (opt_debug || opt_debug_general) fprintf(stdout,"Thread %i has inserted an element with key %s into list %i and relinquished the lock\n", thread_num, (elements+j)->key, list_num);
+     .      .  163:     }
+     .      .  164: 
+     .      .  165:   //////////////////* LENGTH *////////////////////
+     .      .  166:   //get list length
+     .      .  167: 
+     .      .  168:   if (opt_debug) fprintf(stdout, "Getting length: locking all the locks\n");
+     .      .  169:   // LOCK ALL THE LIST LOCKS //
+     .      .  170:   int l;
+     .      .  171:   for (l = 0; l < num_lists; l++)
+     .      .  172:     {
+     .      .  173:       if (sync_type == 'm')
+     .      .  174:         {
+     .      .  175: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  176:           pthread_mutex_lock(&mutex_locks[l]);
+     .      .  177:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  178:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  179:           total_num_locks++;
+     .      .  180: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i.\n", thread_num, l);
+     .      .  181:         }
+     .      .  182:       else if (sync_type == 's')
+     .      .  183:         {
+     .      .  184:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     1      1  185:           while (__sync_lock_test_and_set(&locks[l],1));
+     .      .  186:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  187:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  188:           total_num_locks++;
+     .      .  189: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i.\n", thread_num, l);
+     .      .  190:         }
+     .      .  191:     }
+     .      .  192:   
+     .      .  193:   if (opt_debug_general)fprintf(stdout, "Thread %i has all the locks. Ready to find the length of all lists.\n", thread_num);
+     .      .  194: 
+     .      .  195:   long long list_length = 0;
+     .      .  196:   int m;
+     .      .  197:   for (m = 0; m < num_lists; m++)
+     .      .  198:     {
+     .      .  199:       list_length += SortedList_length(&head[m]);
+     .      .  200:     }
+     .      .  201:   
+     .      .  202:   if (opt_debug_general)fprintf(stdout, "Thread %i has found the list length to be: %llu\n", thread_num, list_length);
+     .      .  203:   
+     .      .  204:   // UNLOCK ALL THE LIST LOCKS //
+     .      .  205:   for (l = 0; l < num_lists; l++)
+     .      .  206:     {
+     .      .  207:       if (sync_type == 'm')
+     .      .  208: 	{	
+     .      .  209: 	  pthread_mutex_unlock(&mutex_locks[l]);
+     .      .  210: 	  if (opt_debug_general) fprintf(stdout, "Thread %i has released lock %i\n", thread_num, l);
+     .      .  211: 	}
+     .      .  212:       else if (sync_type == 's')
+     .      .  213: 	__sync_lock_release(&locks[l]);
+     .      .  214:     }
+     .      .  215: 
+     .      .  216: 
+     .      .  217:   if (opt_debug) fprintf(stdout, "Thread %i has inserted: list Length: %llu\n", thread_num, list_length);
+     .      .  218:   
+     .      .  219:   //look up and delete each of the keys it had previously inserted
+     .      .  220:   char element_key[11] = "";
+     .      .  221:   
+     .      .  222:   if (opt_debug) fprintf(stdout, "Thread %i is about to delete, congrats\n", thread_num);
+     .      .  223: 
+     .      .  224:   SortedListElement_t *element_to_delete;
+     .      .  225:   if (opt_debug) fprintf(stdout, "num_iterations = %llu\n", num_iterations);
+     .      .  226:   if (opt_debug) fprintf(stdout, "element start = %llu\n", element_start);
+     .      .  227:   if (opt_debug) fprintf(stdout, "element start + num_iterations = %llu\n", element_start+num_iterations);  
+     .      .  228:   if (opt_debug) fprintf(stdout, "element end equals: %llu\n", element_end);
+     .      .  229: 
+     .      .  230:   for (j = element_start; j < element_end; j++)
+     .      .  231:     {
+     .      .  232:       strcpy(element_key, (elements+j)->key);
+     .      .  233:       if (opt_debug) fprintf(stdout, "Thread %i has successfully copied %s to element_key, congrats\n", thread_num, element_key);
+     .      .  234: 
+     .      .  235: 
+     .      .  236:       ///////////////* LOOKUP */////////////////
+     .      .  237:       list_num = hash(element_key);
+     .      .  238: 
+     .      .  239:       // LOCK //
+     .      .  240:       if (sync_type == 'm')
+     .      .  241:         {
+     .      .  242:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  243:           pthread_mutex_lock(&mutex_locks[list_num]);
+     .      .  244:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  245:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  246:           total_num_locks++;
+     .      .  247:         }
+     .      .  248:       else if (sync_type == 's')
+     .      .  249:         {
+     .      .  250:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+   340    340  251:           while (__sync_lock_test_and_set(&locks[list_num],1));
+     .      .  252:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  253:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  254:           total_num_locks++;
+     .      .  255:         }
+     .      .  256: 
+     .    142  257:       element_to_delete = SortedList_lookup(&head[list_num],element_key);
+     .      .  258: 
+     .      .  259:       if (opt_debug) fprintf(stdout, "element_to_delete has successfully been found and its key is: %s\n", element_to_delete->key);
+     .      .  260:       
+     .      .  261:       if (element_to_delete == NULL)
+     .      .  262: 	{
+     .      .  263: 	  if (opt_debug) fprintf(stdout, "lookup returned null\n");
+     .      .  264: 	  fprintf(stderr,"Error: Corrupted List - Element not found in list\n");
+     .      .  265: 	  exit(2);
+     .      .  266: 	}
+     .      .  267: 
+     .      .  268:       if(opt_debug) fprintf(stdout, "element_to_delete is not null\n");
+     .      .  269: 
+     .      .  270: 
+     .      .  271:       ////////////////* DELETE *///////////////
+     .      .  272:       int delFlag = SortedList_delete(element_to_delete);
+     .      .  273:       if (delFlag != 0)	
+     .      .  274: 	{
+     .      .  275: 	  fprintf(stderr,"Error: Corrupted List - Invalid prev/next pointers\n");
+     .      .  276: 	  exit(2);
+     .      .  277: 	}
+     .      .  278:       if (opt_debug_general) fprintf(stdout, "Thread %i has succesfully deleted the element with the key: %s\n", thread_num, element_key);
+     .      .  279:       
+     .      .  280:       
+     .      .  281:       // UNLOCK LOCK //
+     .      .  282:       if (sync_type == 'm')
+     .      .  283: 	pthread_mutex_unlock(&mutex_locks[list_num]);
+     .      .  284:       else if (sync_type == 's')
+     .      .  285: 	__sync_lock_release(&locks[list_num]);
+     .      .  286:       
+     .      .  287:     }
+     .      .  288:   
+     .      .  289:   timeArr[thread_num] = waitlock_total;
+     .      .  290:   
+     .      .  291:   if (opt_sync)
+     .      .  292:     lockArr[thread_num]= total_num_locks;
+     .      .  293: 
+     .      .  294: // thread exits at end of function
+     .      .  295: }
+---
+     .      .  296: 
+     .      .  297: void sigHandler()
+     .      .  298: {
+     .      .  299:   fprintf(stderr,"Error: Corrupted List - segmentation fault\n");
+     .      .  300:   exit(2);
+ROUTINE ====================== threadTask in /u/cs/ugrad/elena/ElenaUCLA/Soph/CS111/Project2/Project2B/lab2_list.c
+   783   1086 Total samples (flat / cumulative)
+     .      .   73: {
+     .      .   74:   return (1000000000L * (end_time.tv_sec - start_time.tv_sec)) + (end_time.tv_nsec - start_time.tv_nsec);
+     .      .   75: }
+     .      .   76: 
+     .      .   77: void *threadTask(void *thread_arg)
+---
+     .      .   78: {
+     .      .   79:   struct timespec waiting_for_lock, obtained_lock;
+     .      .   80:   long long waitlock_total = 0;
+     .      .   81:   long long total_num_locks = 0;
+     .      .   82: 
+     .      .   83:   /*// apply locks: either mutex or spin
+     .      .   84:   if (sync_type == 'm')
+     .      .   85:     {
+     .      .   86:       clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .   87:       if (opt_debug) fprintf(stdout, "locking mutex lock\n");
+     .      .   88:       pthread_mutex_lock(&mutex_lock);
+     .      .   89:       clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .   90:       waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .   91:       total_num_locks++;
+     .      .   92:       if (opt_debug) fprintf(stdout, "Total waitlock time (with mutex): %llu\n", waitlock_total);
+     .      .   93:     }
+     .      .   94:   else if (sync_type == 's')
+     .      .   95:     {
+     .      .   96:       clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .   97:       if (opt_debug) fprintf(stdout, "locking spin lock\n");
+     .      .   98:       while (__sync_lock_test_and_set(&lock,1));
+     .      .   99:       clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  100:       waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  101:       total_num_locks++;
+     .      .  102:       if (opt_debug) fprintf(stdout,"Total waitlock time (with spin): %llu\n", waitlock_total);
+     .      .  103:       }*/
+     .      .  104:   
+     .      .  105:   if (opt_debug) fprintf(stdout, "This thread has gotten past locks, congrats\n"); 
+     .      .  106:   
+     .      .  107:   int* ptr_thread_num = (int*)thread_arg;
+     .      .  108:   int thread_num = *ptr_thread_num;
+     .      .  109: 
+     .      .  110:   //if (opt_debug_general && opt_sync) fprintf(stdout, "Thread %i has the lock\n", thread_num);
+     .      .  111: 
+     .      .  112:   if (opt_debug) fprintf(stdout, "Thread %i is about to start inserting, congrats\n", thread_num);
+     .      .  113: 
+     .      .  114:   long long element_start = thread_num*num_iterations;
+     .      .  115:   if (opt_debug_general) fprintf(stdout, "The start index for elements for thread %i is %llu\n", thread_num, element_start);
+     .      .  116:   long long element_end = element_start + num_iterations;
+     .      .  117: 
+     .      .  118:   ///////////////////* INSERT *///////////////////
+     .      .  119:   long j;
+     .      .  120:   int list_num;
+     .      .  121:   for (j = element_start; j < element_end; j++)
+     .      .  122:     {
+     .      .  123:       char *element_to_insert_key = malloc(sizeof(char)*11);
+     .      .  124:       if(element_to_insert_key == NULL)
+     .      .  125: 	{
+     .      .  126: 	  fprintf(stderr, "Error: unable to allocate memory to find hash to insert key \n");
+     .      .  127: 	  exit(1);
+     .      .  128: 	}
+     .      .  129:       else
+     .      .  130: 	strcpy(element_to_insert_key,(elements+j)->key);
+     .      .  131:       
+     .      .  132:       list_num = hash(element_to_insert_key);
+     .      .  133:       
+     .      .  134:       // LOCK //
+     .      .  135:       if (sync_type == 'm')
+     .      .  136: 	{	
+     .      .  137: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  138: 	  pthread_mutex_lock(&mutex_locks[list_num]);
+     .      .  139: 	  clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  140: 	  waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  141: 	  total_num_locks++;
+     .      .  142: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i. Ready to Insert.\n", thread_num, list_num);
+     .      .  143: 	}
+     .      .  144:       else if (sync_type == 's')
+     .      .  145: 	{
+     .      .  146: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+   442    442  147: 	  while (__sync_lock_test_and_set(&locks[list_num],1));
+     .      .  148: 	  clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  149: 	  waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  150: 	  total_num_locks++;
+     .      .  151: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i. Ready to Insert.\n", thread_num, list_num);
+     .      .  152: 	}
+     .      .  153:       
+     .    161  154:       SortedList_insert(&head[list_num],elements+j);
+     .      .  155: 
+     .      .  156:       // UNLOCK //
+     .      .  157:       if (sync_type == 'm')
+     .      .  158: 	pthread_mutex_unlock(&mutex_locks[list_num]);
+     .      .  159:       else if (sync_type == 's')
+     .      .  160: 	__sync_lock_release(&locks[list_num]);
+     .      .  161: 
+     .      .  162:       if (opt_debug || opt_debug_general) fprintf(stdout,"Thread %i has inserted an element with key %s into list %i and relinquished the lock\n", thread_num, (elements+j)->key, list_num);
+     .      .  163:     }
+     .      .  164: 
+     .      .  165:   //////////////////* LENGTH *////////////////////
+     .      .  166:   //get list length
+     .      .  167: 
+     .      .  168:   if (opt_debug) fprintf(stdout, "Getting length: locking all the locks\n");
+     .      .  169:   // LOCK ALL THE LIST LOCKS //
+     .      .  170:   int l;
+     .      .  171:   for (l = 0; l < num_lists; l++)
+     .      .  172:     {
+     .      .  173:       if (sync_type == 'm')
+     .      .  174:         {
+     .      .  175: 	  clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  176:           pthread_mutex_lock(&mutex_locks[l]);
+     .      .  177:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  178:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  179:           total_num_locks++;
+     .      .  180: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i.\n", thread_num, l);
+     .      .  181:         }
+     .      .  182:       else if (sync_type == 's')
+     .      .  183:         {
+     .      .  184:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     1      1  185:           while (__sync_lock_test_and_set(&locks[l],1));
+     .      .  186:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  187:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  188:           total_num_locks++;
+     .      .  189: 	  if (opt_debug_general)fprintf(stdout, "Thread %i has the lock for list %i.\n", thread_num, l);
+     .      .  190:         }
+     .      .  191:     }
+     .      .  192:   
+     .      .  193:   if (opt_debug_general)fprintf(stdout, "Thread %i has all the locks. Ready to find the length of all lists.\n", thread_num);
+     .      .  194: 
+     .      .  195:   long long list_length = 0;
+     .      .  196:   int m;
+     .      .  197:   for (m = 0; m < num_lists; m++)
+     .      .  198:     {
+     .      .  199:       list_length += SortedList_length(&head[m]);
+     .      .  200:     }
+     .      .  201:   
+     .      .  202:   if (opt_debug_general)fprintf(stdout, "Thread %i has found the list length to be: %llu\n", thread_num, list_length);
+     .      .  203:   
+     .      .  204:   // UNLOCK ALL THE LIST LOCKS //
+     .      .  205:   for (l = 0; l < num_lists; l++)
+     .      .  206:     {
+     .      .  207:       if (sync_type == 'm')
+     .      .  208: 	{	
+     .      .  209: 	  pthread_mutex_unlock(&mutex_locks[l]);
+     .      .  210: 	  if (opt_debug_general) fprintf(stdout, "Thread %i has released lock %i\n", thread_num, l);
+     .      .  211: 	}
+     .      .  212:       else if (sync_type == 's')
+     .      .  213: 	__sync_lock_release(&locks[l]);
+     .      .  214:     }
+     .      .  215: 
+     .      .  216: 
+     .      .  217:   if (opt_debug) fprintf(stdout, "Thread %i has inserted: list Length: %llu\n", thread_num, list_length);
+     .      .  218:   
+     .      .  219:   //look up and delete each of the keys it had previously inserted
+     .      .  220:   char element_key[11] = "";
+     .      .  221:   
+     .      .  222:   if (opt_debug) fprintf(stdout, "Thread %i is about to delete, congrats\n", thread_num);
+     .      .  223: 
+     .      .  224:   SortedListElement_t *element_to_delete;
+     .      .  225:   if (opt_debug) fprintf(stdout, "num_iterations = %llu\n", num_iterations);
+     .      .  226:   if (opt_debug) fprintf(stdout, "element start = %llu\n", element_start);
+     .      .  227:   if (opt_debug) fprintf(stdout, "element start + num_iterations = %llu\n", element_start+num_iterations);  
+     .      .  228:   if (opt_debug) fprintf(stdout, "element end equals: %llu\n", element_end);
+     .      .  229: 
+     .      .  230:   for (j = element_start; j < element_end; j++)
+     .      .  231:     {
+     .      .  232:       strcpy(element_key, (elements+j)->key);
+     .      .  233:       if (opt_debug) fprintf(stdout, "Thread %i has successfully copied %s to element_key, congrats\n", thread_num, element_key);
+     .      .  234: 
+     .      .  235: 
+     .      .  236:       ///////////////* LOOKUP */////////////////
+     .      .  237:       list_num = hash(element_key);
+     .      .  238: 
+     .      .  239:       // LOCK //
+     .      .  240:       if (sync_type == 'm')
+     .      .  241:         {
+     .      .  242:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+     .      .  243:           pthread_mutex_lock(&mutex_locks[list_num]);
+     .      .  244:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  245:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  246:           total_num_locks++;
+     .      .  247:         }
+     .      .  248:       else if (sync_type == 's')
+     .      .  249:         {
+     .      .  250:           clock_gettime(CLOCK_MONOTONIC, &waiting_for_lock);
+   340    340  251:           while (__sync_lock_test_and_set(&locks[list_num],1));
+     .      .  252:           clock_gettime(CLOCK_MONOTONIC, &obtained_lock);
+     .      .  253:           waitlock_total += getElapsedTime(waiting_for_lock, obtained_lock);
+     .      .  254:           total_num_locks++;
+     .      .  255:         }
+     .      .  256: 
+     .    142  257:       element_to_delete = SortedList_lookup(&head[list_num],element_key);
+     .      .  258: 
+     .      .  259:       if (opt_debug) fprintf(stdout, "element_to_delete has successfully been found and its key is: %s\n", element_to_delete->key);
+     .      .  260:       
+     .      .  261:       if (element_to_delete == NULL)
+     .      .  262: 	{
+     .      .  263: 	  if (opt_debug) fprintf(stdout, "lookup returned null\n");
+     .      .  264: 	  fprintf(stderr,"Error: Corrupted List - Element not found in list\n");
+     .      .  265: 	  exit(2);
+     .      .  266: 	}
+     .      .  267: 
+     .      .  268:       if(opt_debug) fprintf(stdout, "element_to_delete is not null\n");
+     .      .  269: 
+     .      .  270: 
+     .      .  271:       ////////////////* DELETE *///////////////
+     .      .  272:       int delFlag = SortedList_delete(element_to_delete);
+     .      .  273:       if (delFlag != 0)	
+     .      .  274: 	{
+     .      .  275: 	  fprintf(stderr,"Error: Corrupted List - Invalid prev/next pointers\n");
+     .      .  276: 	  exit(2);
+     .      .  277: 	}
+     .      .  278:       if (opt_debug_general) fprintf(stdout, "Thread %i has succesfully deleted the element with the key: %s\n", thread_num, element_key);
+     .      .  279:       
+     .      .  280:       
+     .      .  281:       // UNLOCK LOCK //
+     .      .  282:       if (sync_type == 'm')
+     .      .  283: 	pthread_mutex_unlock(&mutex_locks[list_num]);
+     .      .  284:       else if (sync_type == 's')
+     .      .  285: 	__sync_lock_release(&locks[list_num]);
+     .      .  286:       
+     .      .  287:     }
+     .      .  288:   
+     .      .  289:   timeArr[thread_num] = waitlock_total;
+     .      .  290:   
+     .      .  291:   if (opt_sync)
+     .      .  292:     lockArr[thread_num]= total_num_locks;
+     .      .  293: 
+     .      .  294: // thread exits at end of function
+     .      .  295: }
+---
+     .      .  296: 
+     .      .  297: void sigHandler()
+     .      .  298: {
+     .      .  299:   fprintf(stderr,"Error: Corrupted List - segmentation fault\n");
+     .      .  300:   exit(2);

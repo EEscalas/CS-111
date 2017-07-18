@@ -1,0 +1,280 @@
+//Elena Escalas
+//704560697
+//elenaescalas@g.ucla.edu
+
+#include <stdio.h>
+#include <unistd.h>
+#include <getopt.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <time.h>
+#include <pthread.h>
+#include <sched.h>
+#include "SortedList.h"
+
+/*
+timespec structure definted in time.h:
+struct timespec {
+  time_t tv_sec; //seconds
+  long tv_nsec;  //nanoseconds
+  };*/
+
+//flags
+int opt_threads = 0;
+int opt_iterations = 0;
+int opt_yield = 0;
+int opt_yield_insert = 0;
+int opt_yield_delete = 0;
+int opt_yield_lookup = 0;
+int opt_debug = 0;
+int opt_sync = 0;
+
+//arg variables
+long long num_threads = 1;
+long long num_iterations = 1;
+char sync_type;
+
+//list variables
+SortedList_t *head;
+SortedListElement_t *elements;
+
+void *threadTask(void *element_head)
+{
+  /*
+  //insert all pre-allocated initialized elements into the list
+  int j;
+  for (j = 0; j < num_iterations; j++)
+    {
+      SortedList_insert(head,element_head+j);
+    }
+
+  //get list length
+  long long list_length = SortedList_length(head);
+  
+  //look up and delete each of the keys it had previously inserted
+
+  SortedListElement_t *temp_element;
+  SortedList_t *current_element;
+  char *element_key; // need an array of element keys!!!
+  
+
+  for (j = 0; j < num_iterations; j++)
+    {
+      current_element = element_head+j;
+      //element_key = current_element->key; // doesn't work: need array of keys instead
+      element_key = "abcdefghij";
+      
+      temp_element = SortedList_lookup(head,element_key);
+
+      if (temp_element == NULL)
+	{
+	  fprintf(stderr,"Error: Corrupted List - Element not found in list\n");
+	  exit(1);
+	}
+
+      if (SortedList_delete(temp_element) == 1)
+	{
+	  fprintf(stderr,"Error: Corrupted List - Invalid prev/next pointers\n");
+	  exit(1);
+	}
+
+      current_element = current_element->next;
+      }*/
+
+  // thread exits at end of function
+}
+
+int main (int argc, char** argv)
+{
+  //ADD SEGFAULT SIGNAL HANDLER
+
+
+  //getopt_long prep
+  int opt;
+  int input_fd;
+  int output_fd;
+  char buffer;
+
+  int this_option_optiond = optind ? optind : 1;
+  int option_index = 0;
+  
+  static struct option long_options[] =
+      {
+        {"threads",    optional_argument, 0, 't'},
+        {"iterations", optional_argument, 0, 'i'},
+        {"yield",      required_argument, 0, 'y'},
+        {"sync",       required_argument, 0, 's'},
+        {"debug",      no_argument,       0, 'd'},
+	{0, 0, 0, 0}
+      };
+
+  while (1) {
+ 
+    opt = getopt_long(argc, argv, "", long_options, &option_index);
+
+    if (opt == -1)
+        break;
+
+    switch(opt)
+      {
+      case 'd':
+	opt_debug = 1;
+	break;
+      case 't':
+	opt_threads = 1;
+	if (optarg == NULL || (atoi(optarg)== 0))
+	  num_threads = 1;
+	else
+	  num_threads = atoi(optarg);
+        break;
+      case 'i':
+	opt_iterations = 1;
+	if (optarg == NULL || (atoi(optarg)== 0))
+	  num_iterations = 1;
+	else
+	  num_iterations = atoi(optarg);
+	break;
+      case 'y':
+	opt_yield = 1;
+	int i;
+	for (i = 0; i < strlen(optarg); i++)
+	  {
+	    if (optarg[i] == 'i') opt_yield_insert = 1;
+	    if (optarg[i] == 'd') opt_yield_delete = 1;
+	    if (optarg[i] == 'l') opt_yield_lookup = 1;
+	  }
+	break;
+      case 's':
+	opt_sync = 1;
+	sync_type = optarg[0];
+	break;
+      default:
+	exit(1);
+	break;
+      }
+  }    
+  
+  //initialize an empty list
+  head = malloc(sizeof(SortedList_t));
+  if (head == NULL)
+    {
+      fprintf(stderr, "Error: Unable to initialize list\n");
+      exit(1);
+    }
+  
+  //create and initialize thread*iterations list elements
+  long long num_elements = num_threads*num_iterations;
+
+  elements = malloc(sizeof(SortedListElement_t)*num_elements);
+  if (elements == NULL)
+    {
+      fprintf(stderr, "Error: Unable to intialize list elements\n");
+      exit(1);
+    }
+
+  long numEle;
+  for (numEle = 0; numEle < num_elements; numEle++)
+    {
+      //create random key
+      char *new_key = malloc(sizeof(char)*11);
+      if (new_key == NULL)
+	{
+	  fprintf (stderr, "Error: Unable to initialize random keys\n");
+	  exit(1);
+	}
+      
+      int m;
+      for (m = 0; m < 10; m++)
+	{
+	  new_key [m] = rand() % 254 + 1;
+	}
+      new_key[10] = 0;
+      
+      (elements+numEle)->key = new_key;
+    }
+  
+  //start the timer
+  struct timespec start_time, end_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
+  
+  
+  if (opt_debug) fprintf(stdout, "Start Time: %i seconds and %i nanoseconds\n", start_time.tv_sec, start_time.tv_nsec);
+  
+  long th = 0;
+  
+  pthread_t *threadArr;
+  threadArr = malloc(sizeof(pthread_t)*num_threads);
+  if (threadArr == NULL)
+    fprintf(stderr, "Error: Unable to create threads\n");
+  
+  for (th = 0; th < num_threads; th++)
+    {
+      long long element_num = 0;
+
+      //create threads
+      if(pthread_create(&threadArr[th], NULL, threadTask,(void *)elements+element_num) != 0)
+	{
+	  fprintf(stderr, "Error: unable to create threads\n");
+	  exit(1);
+	}
+
+      element_num += num_iterations;
+      
+      //if (opt_debug) fprintf(stdout, "//   Thread %i Created: \n//       Counter Value: %i\n", th+1, counter);
+    }     
+  
+  for (th = 0; th < num_threads; th++)
+    {
+      //join threads
+      pthread_join(threadArr[th],NULL);
+    }
+  
+  //get end time
+  clock_gettime(CLOCK_MONOTONIC, &end_time); 
+
+  //deinitialize allocated memeory
+  free(head);
+  //FREE ALLOCATED ELEMENTS
+  
+  /*  print results  */
+  
+  // print name
+  fprintf(stdout,"list-");
+  if (opt_yield) 
+    {
+      if (opt_yield_insert)
+	fprintf(stdout,"i");
+      if (opt_yield_delete)
+	fprintf(stdout,"d");
+      if (opt_yield_lookup)
+	fprintf(stdout, "l");
+      
+      fprintf(stdout, "-");
+    }
+  else
+    fprintf(stdout, "none-");
+  if (opt_sync)
+    fprintf(stdout, "%c,", sync_type);
+  else fprintf(stdout, "none,");
+  
+  int num_lists = 1;
+  long long operations = num_threads*num_iterations*3;
+  long long run_time = (1000000000L * (end_time.tv_sec - start_time.tv_sec)) + (end_time.tv_nsec - start_time.tv_nsec);
+  long long average_time_per_operation = run_time/operations;
+
+  fprintf(stdout, "%llu,", num_threads);                   // number of threads
+  fprintf(stdout, "%llu,",num_iterations);                 // number of iterations
+  fprintf(stdout, "%i,", num_lists);                       // number of lists
+  fprintf(stdout, "%llu,", operations);                    // number of operations
+  fprintf(stdout, "%llu,", run_time);                      // total run time
+  fprintf(stdout, "%llu\n", average_time_per_operation);   // average time per operation
+
+  free(threadArr);
+  exit(0);
+}
+

@@ -1,0 +1,15 @@
+#NAME: Elena Escalas, Susan Krkasharian
+#EMAIL: elenaescalas@g.ucla.edu, skrkasharian@yahoo.com
+#ID: 704560697, 104584663
+
+CC = gcc
+RM = rm -f
+
+default:
+	@
+
+dist:
+	@tar -cf lab3b-704560697.tar.gz README lab3b lab3b.py Makefile
+
+clean:
+

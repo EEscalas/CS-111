@@ -1,0 +1,25 @@
+Elena Escalas
+elenaescalas@g.ucla.edu
+704560697
+
+The included files are lab0.c Makefile (AND a smokeTest bash executable used for make check) backtrace.png breakpoint.png 
+
+Smoke-test cases:
+no options: return input to output
+--input: use input file as input to be outputted
+--output:
+	output inputted text to a file
+	output inputted text to a new file
+--input and --output: text from inputted file to outputted file
+--segfault: segmentation fault occurs
+--catch: nothing happens
+--segfault --catch: segfautl properly caught (exit 4)
+
+Research:
+GNU Emacs Manual
+https://www.cyberciti.biz/faq/linux-rename-file/
+http://www.bic.mni.mcgill.ca/users/kate/Howto/tar_notes.html
+https://www.gnu.org/software/bash/manual/html_node/Bash-Conditional-Expressions.html
+http://stackoverflow.com/questions/14543443/in-c-how-do-you-redirect-stdin-stdout-stderr-to-files-when-making-an-execvp-or
+http://tldp.org/LDP/abs/html/comparison-ops.html
+http://www.techytalk.info/linux-system-programming-open-file-read-file-and-write-file/

@@ -1,0 +1,51 @@
+NAME: Elena Escalas, Susan Krkasharian
+EMAIL: elenaescalas@g.ucla.edu, skrkasharian@yahoo.com
+ID: 704560697, 104584663
+
+Included Files
+lab3b.py
+Source module for lab3b program.
+
+Makefile
+Builds and runs deliverable program with higher level targets: default, dist,
+and clean.
+
+README
+Current file.
+
+References
+http://www.nongnu.org/ext2-doc/ext2.html#DEF-SUPERBLOCK
+https://www.tutorialspoint.com/python/python_functions.htm
+https://stackoverflow.com/questions/12335358/python-what-does-a-semi-colon-do
+https://stackoverflow.com/questions/7571635/fastest-way-to-check-if-a-value-exist-in-a-list
+https://docs.python.org/3/tutorial/classes.html
+https://stackoverflow.com/questions/27563854/why-cant-the-import-command-be-found
+https://stackoverflow.com/questions/19507096/python-error-import-unable-to-open-x-server
+https://unix.stackexchange.com/questions/31414/how-can-i-pass-a-command-line-argument-into-a-shell-script
+https://stackoverflow.com/questions/7654386/how-do-i-properly-escape-data-for-a-makefile
+https://www.tutorialspoint.com/python/python_for_loop.htm
+https://stackoverflow.com/questions/3979077/how-can-i-convert-a-string-to-an-int-in-python
+https://stackoverflow.com/questions/28513250/what-does-return-true-false-actually-do-python
+https://stackoverflow.com/questions/7280644/is-it-possible-in-python-to-update-or-initialize-a-dictionary-key-with-a-singl
+https://stackoverflow.com/questions/26411131/iterate-through-bits-in-c
+https://stackoverflow.com/questions/14679022/converting-from-an-integer-epoch-time-value-to-local-time
+http://www.cplusplus.com/reference/ctime/strftime/
+https://www.tutorialspoint.com/c_standard_library/c_function_localtime.htm
+https://stackoverflow.com/questions/18003370/script-parameters-in-bash
+https://stackoverflow.com/questions/14155669/call-python-script-from-bash-with-argument
+http://www.pythonforbeginners.com/systems-programming/using-the-csv-module-in-python/
+https://stackoverflow.com/questions/2457193/looping-through-columns-in-a-csv-files-in-python
+https://docs.python.org/2/tutorial/classes.html
+https://stackoverflow.com/questions/5741518/reading-each-column-from-csv-file
+https://stackoverflow.com/questions/252703/append-vs-extend
+https://www.tutorialspoint.com/python/python_dictionary.htm
+https://stackoverflow.com/questions/14667578/check-if-a-number-already-exist-in-a-list-in-python
+https://stackoverflow.com/questions/961632/converting-integer-to-string-in-python
+https://stackoverflow.com/questions/20196159/how-to-append-multiple-values-to-a-list-in-python
+https://stackoverflow.com/questions/960733/python-creating-a-dictionary-of-lists
+https://stackoverflow.com/questions/14667578/check-if-a-number-already-exist-in-a-list-in-python
+https://stackoverflow.com/questions/1479649/readably-print-out-a-python-dict-sorted-by-key
+https://stackoverflow.com/questions/961632/converting-integer-to-string-in-python
+https://stackoverflow.com/questions/960733/python-creating-a-dictionary-of-lists
+https://stackoverflow.com/questions/18281865/why-doesnt-rstrip-n-work
+https://stackoverflow.com/questions/960733/python-creating-a-dictionary-of-lists

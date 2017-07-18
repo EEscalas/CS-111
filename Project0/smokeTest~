@@ -1,0 +1,80 @@
+#Elena Escalas
+#704560697
+#elenaescalas@g.ucla.edu
+
+#!/bin/bash
+
+echo "test" >> testFile.txt
+
+#test if general input put to output
+output=$(./lab0 < testFile.txt)
+if [ "test" != "$output" ]; then
+    echo "Error: Input not properly given as ouput"
+fi
+
+#test --input function
+output=$(./lab0 --input=testFile.txt)
+if [ "test" != "$output" ]; then
+    echo "Error: Input option not fully functional"
+fi
+#invalid input
+output=$(./lab0 --input=test)
+exitCode=$(echo $?) 
+if [ "$exitCode" != "2" ]; then
+    echo "Error: Input option inable to detect valid file names"
+fi
+
+#test --output function
+#--output in new file
+output=$(./lab0 --output=newFile.txt < testFile.txt)
+output=$(cat newFile.txt)
+if [ "test" != "$output" ]; then
+    echo "Error: Output option not fully functional"
+fi
+rm newFile.txt
+
+#--output in existing file
+echo "test2" >> testOutput.txt
+output=$(./lab0 --output=testOutput.txt < testFile.txt)
+output=$(cat testOutput.txt)
+if [ "test" != "$output" ]; then
+    echo "Error: Output option not fully functional"
+fi
+rm testOutput.txt
+
+#test --input and --output function
+output=$(./lab0 --input=testFile.txt --output=newFile.txt)
+output=$(cat newFile.txt)
+if [ "test" != "$output" ]; then
+    echo "Error: Output option not fully functional"
+fi
+
+#test --segfault function
+#with both input and output
+output=$(./lab0 --segfault)
+exitCode=$(echo $?)
+if [ "$exitCode" != "139" ]; then
+    echo "Error: Segfault option not fully functional"
+fi
+
+output=$(./lab0 --input=testFile.txt --output=new.txt --segfault)
+exitCode=$(echo $?)
+if [ "$exitCode" != "139" ]; then
+    echo "Error: Segfault option not fully functional"
+fi
+rm new.txt
+
+#test --catch function
+output=$(./lab0 --catch)
+exitCode=$(echo $?)
+if [ "$exitCode" != "0" ]; then
+    echo "Error: Catch option falsely identifying segmentation fault"
+fi
+
+output=$(./lab0 --segfault --catch)
+exitCode=$(echo $?)
+if [ "$exitCode" != "4" ]; then
+    echo "Error: Catch option unable to catch segmentation fault"
+fi
+
+rm testFile.txt
